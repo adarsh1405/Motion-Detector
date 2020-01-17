@@ -1,23 +1,31 @@
 import cv2
 import numpy as np
-import os
-import six.moves.urllib as urllib
 import sys
-import tarfile
 import tensorflow as tf
-import zipfile
 from datetime import datetime
 import requests
+import shutil
 from collections import defaultdict
-from io import StringIO
-from matplotlib import pyplot as plt
-from PIL import Image
-
+import subprocess
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
-
+def get_obs_command():
+	obs=""
+	if shutil.which('obs'):
+		obs="obs"
+	elif shutil.which('obs64'):
+		obs="obs64"
+	elif shutil.which('obs32'):
+		obs="obs32"
+	else:
+		return None
+	print("Starting to stream...")
+	if 'win32' in sys.platform:
+		return "timeout 10 /nobreak && obs --startstreaming --minimize-to-tray --profile \"Intrusion\""
+	else:
+		return "sleep 10 && obs --startstreaming --minimize-to-tray --profile \"Intrusion\"" 
 
 def alert(number,call=False):
 	cookies = {"X-App-Version": "1.0", "X-Phone-Platform": "web", "X-Default-City": "1", "X-Pincode": "400001", "XdI": "0d429faa36c459599d17506cad32cb25", "_gcl_au": "1.1.782225019.1575836626", "_omappvp": "iTEq3HaHcwk52kq9H5VOubYq7rrvfnz8pYZNWJPOeYJR14H6BOzCCODJpYMKlETqLuoAr2jH8LfGUUv7SQsToibzWk1PqWBC", "_omappvs": "1575836625625", "WZRK_S_R9Z-WWR-854Z": "%7B%22p%22%3A1%2C%22s%22%3A1575836625%2C%22t%22%3A1575836627%7D", "WZRK_G": "52d860bf981a489ca4dbd9d97078697b"}
@@ -61,7 +69,7 @@ category_index = label_map_util.create_category_index(categories)
 
 #intializing the web camera device
 
-SAVE_OUTPUT=True
+SAVE_OUTPUT=False
 MIN_DETECT=0.4
 FPS=10.0
 RESXY=(640,480)
@@ -76,6 +84,8 @@ if SAVE_OUTPUT:
 with detection_graph.as_default():
 	with tf.compat.v1.Session(graph=detection_graph) as sess:
 		ret = True
+		if get_obs_command():
+			subprocess.Popen([get_obs_command()],shell=True)
 		try:
 			while (ret):
 				ret,image_np = cap.read()

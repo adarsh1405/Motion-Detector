@@ -1,0 +1,9 @@
+{
+    "settings": {
+        "bwtest": false,
+        "key": "live_485999919_rQg74ojDsgaxUV5Rs5fe90rEIKKktF",
+        "server": "rtmp://live-sin.twitch.tv/app",
+        "service": "Twitch"
+    },
+    "type": "rtmp_common"
+}
